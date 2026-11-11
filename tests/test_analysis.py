@@ -111,4 +111,35 @@ class ValidationTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):f('MSFT')
 
 
+class EoyAxisTests(unittest.TestCase):
+    def test_actual_eoy_years_positions_and_unchanged_heights(self):
+        import matplotlib.pyplot as plt
+        from matplotlib.axes import Axes
+        from plot_compat import eoy_year_ticks
+        series, *_ = analyze.load_input(analyze.ROOT/'data/synthetic-returns.csv', analyze.ROOT/'data/synthetic-returns.metadata.json')
+        original = Axes.set_xticklabels
+        try:
+            with eoy_year_ticks():
+                fig = analyze.qs.plots.yearly_returns(series, benchmark=None, show=False, prepare_returns=False)
+            self.assertIs(Axes.set_xticklabels, original)
+            ax = fig.axes[0]
+            self.assertEqual([x.get_text() for x in ax.get_xticklabels()], ['2022','2023','2024'])
+            bars = ax.containers[0]
+            for tick, bar in zip(ax.get_xticks(), bars, strict=True):
+                self.assertAlmostEqual(tick, bar.get_x()+bar.get_width()/2)
+            for year, bar in zip([2022,2023,2024], bars, strict=True):
+                wealth=1.0
+                for value in series[series.index.year==year]:wealth*=1+value
+                self.assertAlmostEqual(bar.get_height(), wealth-1, places=12)
+        finally:plt.close('all')
+
+    def test_eoy_adapter_restores_after_error(self):
+        from matplotlib.axes import Axes
+        from plot_compat import eoy_year_ticks
+        original=Axes.set_xticklabels
+        with self.assertRaises(RuntimeError):
+            with eoy_year_ticks():raise RuntimeError('simulated report failure')
+        self.assertIs(Axes.set_xticklabels, original)
+
+
 if __name__=='__main__':unittest.main()

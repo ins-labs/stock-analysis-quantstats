@@ -20,6 +20,7 @@ matplotlib.use('Agg')
 import pandas as pd
 import quantstats as qs
 import yfinance as yf
+from plot_compat import eoy_year_ticks
 
 ROOT = Path(__file__).resolve().parent
 
@@ -118,11 +119,12 @@ def run(args):
     template=re.sub(r'<link\b[^>]*rel="shortcut icon"[^>]*>', '',template)
     temp_template=output/'report-template.html';temp_template.write_text(template)
     try:
-        qs.reports.html(series.copy(),benchmark=None,rf=0.0,output=str(output/'tearsheet.html'),
-            compounded=True,periods_per_year=args.periods_per_year,match_dates=False,
-            title=meta['dataset_kind'].upper()+' RETURNS - NOT AN INVESTMENT RECOMMENDATION',
-            strategy_title='Explicit returns CSV',figfmt='svg',template_path=str(temp_template),
-            parameters={'Input SHA256':input_hash,'Input kind':meta['dataset_kind'],'Compounding':'geometric'})
+        with eoy_year_ticks():
+            qs.reports.html(series.copy(),benchmark=None,rf=0.0,output=str(output/'tearsheet.html'),
+                compounded=True,periods_per_year=args.periods_per_year,match_dates=False,
+                title=meta['dataset_kind'].upper()+' RETURNS - NOT AN INVESTMENT RECOMMENDATION',
+                strategy_title='Explicit returns CSV',figfmt='svg',template_path=str(temp_template),
+                parameters={'Input SHA256':input_hash,'Input kind':meta['dataset_kind'],'Compounding':'geometric'})
     finally:temp_template.unlink(missing_ok=True)
     report=(output/'tearsheet.html').read_text()
     if '<svg'not in report or '{{'in report or re.search(r'<(?:script|img|link)\b[^>]*(?:src|href)=[\"\']https?://',report,re.I):
