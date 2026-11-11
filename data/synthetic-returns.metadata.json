@@ -1,0 +1,11 @@
+{
+  "dataset_kind": "synthetic",
+  "instrument": "INVENTED deterministic strategy, not any stock/index/EGX instrument",
+  "source": "Repository fixture: repeat 20-return pattern + ((i//20)%5-2)*0.0002; weekdays from 2022-01-03, 756 rows. No market/provider data.",
+  "as_of": "2026-11-11T06:30:00+02:00",
+  "timezone": "Africa/Cairo",
+  "return_basis": "Invented fractional simple daily portfolio returns. No fees, FX, prices, dividends or adjustments inferred. Calendar is invented weekdays, not an exchange session calendar.",
+  "frequency": "daily_observations",
+  "publication_rights": "Synthetic fixture invented for public testing; no private or licensed inputs.",
+  "return_type": "simple_fractional"
+}
